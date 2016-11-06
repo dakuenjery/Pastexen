@@ -7,7 +7,7 @@
 #include <QFile>
 #include <QLocalServer>
 #include "configwidget.h"
-#include "network.h"
+#include "network/networkmanager.h"
 #include "defines.h"
 #include "../utils/usettings.h"
 #include "traywindow.h"
@@ -43,7 +43,7 @@ public:
         return *((Application*)qApp)->_settings;
     }
 
-    static const Network& network() {
+    static const NetworkManager& network() {
         return *((Application*)qApp)->_network;
     }
 
@@ -116,7 +116,7 @@ private:
     TrayWindow *_trayWindow;
     QSystemTrayIcon *_trayIcon;
     QMenu *_trayIconMenu;
-    Network *_network;
+    NetworkManager *_network;
     USettings *_settings;
     QMap<QString, QString> _languages;
     QLocalServer *_localServer;

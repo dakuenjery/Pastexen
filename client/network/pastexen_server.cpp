@@ -6,21 +6,30 @@
 #include "network.h"
 #include "utils.h"
 #include "application.h"
+#include "pastexen_server.h"
 
 #include "../utils/udebug.h"
 
-Network::Network(const QString& hostName, quint16 port, QObject *parent)
-    : QObject(parent)
-    , _hostName(hostName)
-    , _port(port)
+PastexenServer::PastexenServer(QObject *parent) :
+    Network(parent)
 {
+
+}
+
+void PastexenServer::init()
+{
+    if (!_serverAddr.isNull())
+        return;
+
+    _hostName = Application::GetHostName();
+    _port = Application::GetPort();
+
     connect(&_socket, SIGNAL(readyRead()), SLOT(onDataReceived()));
     this->startTimer(30000);
     timerEvent(NULL);
 }
 
-
-void Network::lookedUp(const QHostInfo &host)
+void PastexenServer::lookedUp(const QHostInfo &host)
 {
     if (host.error() != QHostInfo::NoError) {
         qDebug() << "Lookup failed:" << host.errorString();
@@ -30,7 +39,7 @@ void Network::lookedUp(const QHostInfo &host)
     emit ready();
 }
 
-void Network::timerEvent(QTimerEvent *) {
+void PastexenServer::timerEvent(QTimerEvent *) {
     if (_serverAddr.isNull()) {
         QHostInfo::abortHostLookup(_lookupId);
         _lookupId = QHostInfo::lookupHost(_hostName,
@@ -38,7 +47,8 @@ void Network::timerEvent(QTimerEvent *) {
     }
 }
 
-void Network::upload(const QByteArray& data, const QString &type)
+
+void PastexenServer::upload(QString filename, QByteArray data, QString type)
 {
     if (_serverAddr.isNull()) {
         UDebug << "Unable to upload data: host not resolved";
@@ -54,7 +64,6 @@ void Network::upload(const QByteArray& data, const QString &type)
     UDebug << "Server addr: " << _serverAddr.toString() << ":" << _port;
     _socket.connectToHost(_serverAddr, _port);
     _socket.waitForConnected(4000);
-
 
     QByteArray arr;
     arr.append("proto=pastexen\n");
@@ -73,7 +82,7 @@ void Network::upload(const QByteArray& data, const QString &type)
     _socket.write(arr);
 }
 
-QByteArray Network::readFile(const QString &fileName)
+QByteArray PastexenServer::readFile(const QString &fileName)
 {
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly))
@@ -84,7 +93,7 @@ QByteArray Network::readFile(const QString &fileName)
     return file.readAll();
 }
 
-void Network::onDataReceived()
+void PastexenServer::onDataReceived()
 {
     const QByteArray arr = _socket.readAll();
     const QString link = getValue(arr, "url");

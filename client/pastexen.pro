@@ -22,7 +22,7 @@ TRANSLATIONS = pastexen_ru.ts
 SOURCES += main.cpp \
     application.cpp \
     configwidget.cpp \
-    network.cpp \
+    network/network.cpp \
     imageselectwidget.cpp \
     languageselectdialog.cpp \
     scanhotkeydialog.cpp \
@@ -35,12 +35,14 @@ SOURCES += main.cpp \
     ../utils/uglobalhotkeys.cpp \
     traywindow.cpp \
     screenshoteditwidget.cpp \
-    autorunmanager.cpp
+    autorunmanager.cpp \
+    network/pastexen_server.cpp \
+    network/networkmanager.cpp
 
 HEADERS  += \
     application.h \
     configwidget.h \
-    network.h \
+    network/network.h \
     defines.h \
     imageselectwidget.h \
     utils.h \
@@ -56,7 +58,9 @@ HEADERS  += \
     ../utils/udebug.h \
     traywindow.h \
     screenshoteditwidget.h \
-    autorunmanager.h
+    autorunmanager.h \
+    network/pastexen_server.h \
+    network/networkmanager.h
 
 RESOURCES += \
     resources.qrc

@@ -8,15 +8,13 @@
 #include "QProgressBar"
 
 const QString STYLESHEET =
-        "* {"
-            "background-color: rgb(255, 255, 255);"
-        "}"
         "TrayWindow {"
             "border-style: outset;"
-            "border-width: 2px;"
+            "border-width: 0px;"
             "border-radius: 5px;"
-            "border-color: black;"
-            "padding: 3px;"
+//            "border-color: black;"
+            "padding: 5px;"
+            "background-color: rgb(255, 255, 255);"
         "}"
         "#Text {"
             "min-height: 13pt;"
@@ -81,28 +79,28 @@ void TrayWindow::showUploadMessage(QString text)
     this->text.setText(text);
     this->bar.setVisible(true);
 
-    const QTcpSocket& socket = Application::network().socket();
+//    const QTcpSocket& socket = Application::network().socket();
 
-    if (socket.isOpen() && socket.bytesToWrite() > 0) {
-        connect(&socket, &QTcpSocket::bytesWritten, [&](qint64 value) {
-            int barValue;
-            qint64 s = socket.bytesToWrite();
-            if (s > 0) {
-                double d = value / s;
-                barValue = d*100;
-            } else {
-                barValue = 100;
-            }
-
-            bar.setValue(barValue);
-        });
+//    if (socket.isOpen() && socket.bytesToWrite() > 0) {
+//        connect(&socket, &QTcpSocket::bytesWritten, [&](qint64 value) {
+//            int barValue;
+//            qint64 s = socket.bytesToWrite();
+//            if (s > 0) {
+//                double d = value / s;
+//                barValue = d*100;
+//            } else {
+//                barValue = 100;
+//            }
+//
+//            bar.setValue(barValue);
+//        });
         connect(&Application::network(), &Network::linkReceived, [&]() {
             bar.setValue(100);
             this->text.setText("Done!");
             this->startTimer(3000);
             disconnect(this);
         });
-    }
+//    }
     show();
 }
 

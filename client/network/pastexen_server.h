@@ -7,33 +7,33 @@
 #include <QSettings>
 #include <QHostAddress>
 #include <QHostInfo>
+#include "network.h"
 #include "defines.h"
 
-class Network : public QObject
+class PastexenServer : public Network
 {
     Q_OBJECT
 public:
-    explicit Network(const QString& hostName, quint16 port, QObject *parent = 0);
-    void uploadFile(const QString &fileName, const QString &type);
-    void upload(const QByteArray &data, const QString &type);
+    explicit PastexenServer(QObject *parent = nullptr);
+
+    void init() override;
+    void upload(QString filename, QByteArray data, QString type) override;
 
     const QTcpSocket& socket() const {
         return _socket;
     }
 
-signals:
-    void linkReceived(const QString &link);
-    void trayMessage(const QString &caption, const QString &text);
-    void ready(); // dns was resolve
 private slots:
     void onDataReceived();
     void lookedUp(const QHostInfo &host);
-private:
+
+protected:
     QByteArray readFile(const QString& fileName);
-    void timerEvent(QTimerEvent *);
+    void timerEvent(QTimerEvent *) override;
+
 private:
-    QString _hostName;
-    quint16 _port;
+    QString _hostName = "";
+    quint16 _port = 0;
     bool _ready;
     QTcpSocket _socket;
     QHostAddress _serverAddr;

@@ -84,7 +84,7 @@ Application::Application(int& argc, char *argv[]) :
     , _trayWindow(0)
     , _trayIcon(0)
     , _trayIconMenu(0)
-    , _network(0)
+    , _network(new NetworkManager(this))
     , _settings(0)
     , Sharing(false)
     , _timerId(-1)
@@ -150,7 +150,7 @@ void Application::uploadFile(QString request)
         pixmap.save(&buffer, imagetype.toLocal8Bit().constData());
         buffer.close();
         sending();
-        _network->upload(imageBytes, ImgExt.completeSuffix());
+        _network->upload("", imageBytes, ImgExt.completeSuffix());
         _trayWindow->showUploadMessage(tr("Uploading image..."));
         Sharing = false;
     }
@@ -177,7 +177,7 @@ void Application::uploadFile(QString request)
         QTextStream textStream(&source);
         QString text = textStream.readAll();
         sending();
-        _network->upload(text.toUtf8(), ImgExt.completeSuffix());
+        _network->upload("", text.toUtf8(), ImgExt.completeSuffix());
         _trayWindow->showUploadMessage(tr("Uploading code..."));
 
         Sharing = false;
@@ -242,6 +242,7 @@ bool Application::pxAppInit()
             qDebug() << "Error: failed to save settings";
         }
     }
+
     initLanguages();
 
     _configWidget = new ConfigWidget(GetAppName(), _languages);
@@ -273,7 +274,7 @@ bool Application::pxAppInit()
     #endif
     _trayIcon->setContextMenu(_trayIconMenu);                                   // Tray icon
 
-    _network = new Network(GetHostName(), GetPort(), this);
+    _network->init();
     connect(_network, SIGNAL(linkReceived(QString)), SLOT(linkAvaliable(QString)));     // Network
 
     this->setQuitOnLastWindowClosed(false);
@@ -399,7 +400,7 @@ void Application::processScreenshotNext(bool isFullScreen, bool useFullScreenMak
     buffer.close();
     try {
         sending();
-        _network->upload(imageBytes, imagetype);
+        _network->upload("", imageBytes, imagetype);
         _trayWindow->showUploadMessage(tr("Uploading image..."));
     } catch (UException &e) {
         emit trayMessage(e.what(), TMT_Error);
@@ -621,7 +622,7 @@ void Application::timerEvent(QTimerEvent *) {
     QString sourcestype = settings().GetParameter("sourcetype", DEFAULT_SOURCES_TYPE);
 
     try {
-        _network->upload(text.toUtf8(), sourcestype);
+        _network->upload("", text.toUtf8(), sourcestype);
         _trayWindow->showUploadMessage(tr("Uploading code..."));
     } catch(UException &e) {
         emit trayMessage(e.what(), TMT_Error);
